@@ -1,5 +1,6 @@
 package com.studenthack.team40.team40;
 
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -29,6 +30,12 @@ import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,11 +47,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private BeaconManager beaconManager;
     private TextView txt;
     private ArrayList<Beacon> listOfBeacons = new ArrayList<>();
-    private ArrayList<Checkpoint> listOfChekpoints = new ArrayList<>();
+    private ArrayList<Checkpoint> listOfCheckpoints = new ArrayList<>();
     private Region region;
     private GoogleApiClient client;
     private BeaconConsumer consumer = this;
     private Boolean running = true;
+    private String output;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +61,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (running){
+                if (running) {
                     running = false;
                     beaconManager.unbind(consumer);
                     Snackbar.make(view, "Stopped", Snackbar.LENGTH_SHORT)
@@ -72,16 +81,30 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
         });
 
-        Beacon beacon = new Beacon.Builder()
+        try
+        {
+            //Load the file from the raw folder - don't forget to OMIT the extension
+            output = LoadFile();
+        }
+        catch (IOException e)
+        {
+            //display an error toast message
+            Toast toast = Toast.makeText(this, "File: not found!", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+
+        Log.d(TAG,"post deserialization = " + listOfCheckpoints.toString());
+        /*Beacon beacon = new Beacon.Builder()
                 .setId1("b9407f30-f5f8-466e-aff9-25556b57fe6d")
                 .setId2("14547")
-                .setId3("61162")
+                .setId3("40129")
                 .setManufacturer(0x0118) // Radius Networks.  Change this for other beacon layouts
                 .setTxPower(-59)
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
 
-        listOfChekpoints.add(new Checkpoint(new LatLng(123.0, 123.0), "Point 1", beacon));
+        listOfCheckpoints.add(new Checkpoint(new LatLng(123.0, 123.0), "Point 1", beacon));*/
         region = new Region("ranged region", Identifier.fromUuid(UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D")), null, null);
 
         beaconManager = BeaconManager.getInstanceForApplication(this);
@@ -97,15 +120,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
     private boolean IsACheckpoint(Beacon beacon)
     {
-        for (Checkpoint point : listOfChekpoints)
-        {
-            if(point.getId3().equals(beacon.getId3())) return true;
+        if (listOfCheckpoints.size() > 0) {
+            for (Checkpoint point : listOfCheckpoints) {
+                if (point.getId3().equals(beacon.getId3())) return true;
+            }
         }
         return false;
     }
     private Boolean compare() {
         for (Beacon beacon : listOfBeacons) {
-            for (Checkpoint c : listOfChekpoints) {
+            for (Checkpoint c : listOfCheckpoints) {
                 Log.d(TAG, c.getId3() + " | " + beacon.getId3());
                 if (c.getId3().equals(beacon.getId3())) return true;
             }
@@ -176,9 +200,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
                 for (Beacon oneBeacon : beacons) {
+                    Log.d(TAG, "The ID3 is = " + oneBeacon.getId3().toString() + IsACheckpoint(oneBeacon));
+                    if (IsACheckpoint(oneBeacon)) {
+                        if(listOfBeacons.contains(oneBeacon)) listOfBeacons.remove(oneBeacon);
 
-                    if (listOfBeacons.contains(oneBeacon) && IsACheckpoint(oneBeacon)) {
-                        listOfBeacons.remove(oneBeacon);
                         listOfBeacons.add(oneBeacon);
                     }
                     Log.d(TAG, "distance: " + oneBeacon.getDistance() + " id:" + oneBeacon.getId1() + "/" + oneBeacon.getId2() + "/" + oneBeacon.getId3());
@@ -245,4 +270,29 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
     }
+
+    public String LoadFile() throws IOException
+    {
+        //Create a InputStream to read the file into
+        InputStream iS;
+
+        //get the file as a stream
+        iS = this.getResources().openRawResource(R.raw.checkpoints);
+
+        //create a buffer that has the same size as the InputStream
+        byte[] buffer = new byte[iS.available()];
+        //read the text file as a stream, into the buffer
+        iS.read(buffer);
+        //create a output stream to write the buffer into
+        ByteArrayOutputStream oS = new ByteArrayOutputStream();
+        //write this buffer to the output stream
+        oS.write(buffer);
+        //Close the Input and Output streams
+        oS.close();
+        iS.close();
+
+        //return the output stream as a String
+        return oS.toString();
+    }
+
 }

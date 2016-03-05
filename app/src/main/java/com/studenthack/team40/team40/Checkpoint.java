@@ -7,17 +7,18 @@ import com.google.android.gms.maps.model.LatLng;
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.Identifier;
 
-@SuppressLint("ParcelCreator")
-public class Checkpoint {
-    private LatLng coordinates;
+import java.io.Serializable;
+
+public class Checkpoint implements Serializable {
+    //private LatLng coordinates;
     private String name;
     private double distance;
     private Identifier id1;
     private Identifier id2;
     private Identifier id3;
 
-    public LatLng getCoordinates(){ return coordinates; }
-    public void setCoordinates(LatLng co) { coordinates = co; }
+    /*public LatLng getCoordinates(){ return coordinates; }
+    public void setCoordinates(LatLng co) { coordinates = co; }*/
 
     public String getName() { return name; }
     public void setName(String n) { name = n; }
@@ -35,7 +36,7 @@ public class Checkpoint {
     public void setId3(Identifier id) { id3 = id; }
 
     public Checkpoint(LatLng co, String n, Beacon beacon){
-        coordinates = co;
+        //coordinates = co;
         name = n;
         distance = beacon.getDistance();
         id1 = beacon.getId1();
