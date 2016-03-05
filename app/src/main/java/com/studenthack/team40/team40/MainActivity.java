@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private BeaconConsumer consumer = this;
     private Boolean running = true;
     private String output;
+    private Resources res;
+    private InputStream in;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //res = getResources();
+        in = getResources().openRawResource(R.raw.checkpoints);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -81,20 +85,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
         });
 
-        try
-        {
-            //Load the file from the raw folder - don't forget to OMIT the extension
-            output = LoadFile();
-        }
-        catch (IOException e)
-        {
-            //display an error toast message
-            Toast toast = Toast.makeText(this, "File: not found!", Toast.LENGTH_LONG);
-            toast.show();
-        }
-
-
-        Log.d(TAG,"post deserialization = " + listOfCheckpoints.toString());
+        HandleXML obj = new HandleXML();
+        obj.fetchXML(in);
+        listOfCheckpoints = obj.getListOfCheckpoints();
+      //  Log.d(TAG,"post deserialization = " + listOfCheckpoints.toString());
         /*Beacon beacon = new Beacon.Builder()
                 .setId1("b9407f30-f5f8-466e-aff9-25556b57fe6d")
                 .setId2("14547")
@@ -120,9 +114,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
     private boolean IsACheckpoint(Beacon beacon)
     {
-        if (listOfCheckpoints.size() > 0) {
+        if (!listOfCheckpoints.isEmpty()) {
             for (Checkpoint point : listOfCheckpoints) {
-                if (point.getId3().equals(beacon.getId3())) return true;
+                if (point.getId3().equals(beacon.getId3().toString())) return true;
             }
         }
         return false;

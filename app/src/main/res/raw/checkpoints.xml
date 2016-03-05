@@ -1,7 +1,7 @@
 <Checkpoint>
-    <name>Albert square</name>
-    <id1>b9407f30-f5f8-466e-aff9-25556b57fe6d</id1>
-    <id2>14547</id2>
-    <id3>40129</id3>
-    <distance>10</distance>
+    <name value="Albert square"></name>
+    <id1 value="b9407f30-f5f8-466e-aff9-25556b57fe6d"></id1>
+    <id2 value="14547"></id2>
+    <id3 value="40129"></id3>
+    <distance value="10"></distance>
 </Checkpoint>
