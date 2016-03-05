@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private BeaconManager beaconManager;
     private TextView txt;
     private ArrayList<Beacon> listOfBeacons = new ArrayList<>();
-    private ArrayList<Checkpoint> list = new ArrayList<>();
+    private ArrayList<Checkpoint> listOfChekpoints = new ArrayList<>();
     private Region region;
     private GoogleApiClient client;
     private BeaconConsumer consumer = this;
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
 
-        list.add(new Checkpoint(new LatLng(123.0, 123.0), "Point 1", beacon));
+        listOfChekpoints.add(new Checkpoint(new LatLng(123.0, 123.0), "Point 1", beacon));
         region = new Region("ranged region", Identifier.fromUuid(UUID.fromString("B9407F30-F5F8-466E-AFF9-25556B57FE6D")), null, null);
 
         beaconManager = BeaconManager.getInstanceForApplication(this);
@@ -95,9 +95,17 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    private boolean IsACheckpoint(Beacon beacon)
+    {
+        for (Checkpoint point : listOfChekpoints)
+        {
+            if(point.getId3().equals(beacon.getId3())) return true;
+        }
+        return false;
+    }
     private Boolean compare() {
         for (Beacon beacon : listOfBeacons) {
-            for (Checkpoint c : list) {
+            for (Checkpoint c : listOfChekpoints) {
                 Log.d(TAG, c.getId3() + " | " + beacon.getId3());
                 if (c.getId3().equals(beacon.getId3())) return true;
             }
@@ -169,16 +177,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
                 for (Beacon oneBeacon : beacons) {
 
-                    if (listOfBeacons.contains(oneBeacon)) {
+                    if (listOfBeacons.contains(oneBeacon) && IsACheckpoint(oneBeacon)) {
                         listOfBeacons.remove(oneBeacon);
                         listOfBeacons.add(oneBeacon);
-                    } else listOfBeacons.add(oneBeacon);
+                    }
                     Log.d(TAG, "distance: " + oneBeacon.getDistance() + " id:" + oneBeacon.getId1() + "/" + oneBeacon.getId2() + "/" + oneBeacon.getId3());
                 }
                 runOnUiThread(new Runnable() {
                     public void run() {
                         txt.setText(listOfBeacons.toString());
-                        if (compare()) {
+                        if (listOfBeacons.size() > 0) {
                             Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
                             beaconManager.unbind(consumer);
                             running = false;
