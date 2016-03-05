@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private String output;
     private Resources res;
     private InputStream in;
+    private Party currentParty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

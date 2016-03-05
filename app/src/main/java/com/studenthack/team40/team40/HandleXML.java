@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.util.Log;
 import android.util.Xml;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.altbeacon.beacon.Identifier;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -51,6 +53,9 @@ public class HandleXML extends Activity{
                             case "name":
                                 ch.setName(myParser.getAttributeValue(null, "value"));
                                 break;
+                            case "coordinates":
+                                ch.setCoordinates(new LatLng(Double.valueOf(myParser.getAttributeValue(null, "lat")),
+                                        Double.valueOf(myParser.getAttributeValue(null, "long"))));
                             case "id1":
                                 ch.setId1(myParser.getAttributeValue(null, "value"));
                                 break;

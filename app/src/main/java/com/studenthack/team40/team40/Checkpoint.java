@@ -10,15 +10,15 @@ import org.altbeacon.beacon.Beacon;
 import java.io.Serializable;
 
 public class Checkpoint implements Serializable {
-    //private LatLng coordinates;
+    private LatLng coordinates;
     private String name;
     private double distance;
     private String id1;
     private String id2;
     private String id3;
 
-    /*public LatLng getCoordinates(){ return coordinates; }
-    public void setCoordinates(LatLng co) { coordinates = co; }*/
+    public LatLng getCoordinates(){ return coordinates; }
+    public void setCoordinates(LatLng co) { coordinates = co; }
 
     public String getName() { return name; }
     public void setName(String n) { name = n; }
