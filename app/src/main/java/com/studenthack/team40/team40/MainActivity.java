@@ -114,22 +114,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
     private boolean IsACheckpoint(Beacon beacon)
     {
-        if (!listOfCheckpoints.isEmpty()) {
+        if (listOfCheckpoints.size()>0) {
             for (Checkpoint point : listOfCheckpoints) {
                 if (point.getId3().equals(beacon.getId3().toString())) return true;
             }
         }
         return false;
     }
-    private Boolean compare() {
-        for (Beacon beacon : listOfBeacons) {
-            for (Checkpoint c : listOfCheckpoints) {
-                Log.d(TAG, c.getId3() + " | " + beacon.getId3());
-                if (c.getId3().equals(beacon.getId3())) return true;
-            }
-        }
-        return false;
-    }
+
 
     @Override
     protected void onDestroy() {
@@ -196,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 for (Beacon oneBeacon : beacons) {
                     Log.d(TAG, "The ID3 is = " + oneBeacon.getId3().toString() + IsACheckpoint(oneBeacon));
                     if (IsACheckpoint(oneBeacon)) {
-                        if(listOfBeacons.contains(oneBeacon)) listOfBeacons.remove(oneBeacon);
+                        if (listOfBeacons.contains(oneBeacon)) listOfBeacons.remove(oneBeacon);
 
                         listOfBeacons.add(oneBeacon);
                     }
@@ -204,12 +196,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 }
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        txt.setText(listOfBeacons.toString());
+
                         if (listOfBeacons.size() > 0) {
+                            txt.setText(listOfBeacons.toString());
                             Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
                             beaconManager.unbind(consumer);
                             running = false;
                         }
+                        else txt.setText("Hello world");
                     }
                 });
 
@@ -265,28 +259,5 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         client.disconnect();
     }
 
-    public String LoadFile() throws IOException
-    {
-        //Create a InputStream to read the file into
-        InputStream iS;
-
-        //get the file as a stream
-        iS = this.getResources().openRawResource(R.raw.checkpoints);
-
-        //create a buffer that has the same size as the InputStream
-        byte[] buffer = new byte[iS.available()];
-        //read the text file as a stream, into the buffer
-        iS.read(buffer);
-        //create a output stream to write the buffer into
-        ByteArrayOutputStream oS = new ByteArrayOutputStream();
-        //write this buffer to the output stream
-        oS.write(buffer);
-        //Close the Input and Output streams
-        oS.close();
-        iS.close();
-
-        //return the output stream as a String
-        return oS.toString();
-    }
 
 }
