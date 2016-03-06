@@ -16,6 +16,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.os.Bundle;
+import android.app.Activity;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -53,21 +58,33 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private BeaconConsumer consumer = this;
     private Boolean running = true;
     private String output;
+     FloatingActionButton fab;
     private Resources res;
     private InputStream in;
     private Party currentParty;
+
+    //image slider
+    ViewPager viewPager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        PagerAdapter adapter = new CustomAdapter(MainActivity.this);
+        viewPager.setAdapter(adapter);
+
+        //super.onCreate(savedInstanceState);
+        //setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle("New Run");
 
         //res = getResources();
         in = getResources().openRawResource(R.raw.checkpoints);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -76,16 +93,22 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                     beaconManager.unbind(consumer);
                     Snackbar.make(view, "Stopped", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
+                    fab.setImageResource(R.drawable.ic_media_play);
 
                 } else {
                     running = true;
                     beaconManager.bind(consumer);
                     Snackbar.make(view, "Running", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
+                    fab.setImageResource(R.drawable.ic_media_pause);
+
                 }
             }
         });
 
+
+
+        Log.d(TAG, "post deserialization = " + listOfCheckpoints.toString());
         HandleXML obj = new HandleXML();
         obj.fetchXML(in);
         listOfCheckpoints = obj.getListOfCheckpoints();
@@ -123,21 +146,20 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         return false;
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         beaconManager.unbind(this);
     }
 
-    @Override
+   /* @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
-    @Override
+   /* @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -150,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @Override
     public void onBeaconServiceConnect() {
@@ -203,6 +225,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                             Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
                             beaconManager.unbind(consumer);
                             running = false;
+                            fab.setImageResource(R.drawable.ic_media_pause);
+
                         }
                         else txt.setText("Hello world");
                     }
