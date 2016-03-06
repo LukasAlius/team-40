@@ -1,18 +1,18 @@
 <CheckpointList>
     <Checkpoint>
-        <name value="Albert square"></name>
-        <coordinates lat="40" long="20"></coordinates>
-        <id1 value="b9407f30-f5f8-466e-aff9-25556b57fe6d"></id1>
-        <id2 value="14547"></id2>
-        <id3 value="40129"></id3>
-        <distance value="10"></distance>
+        <name value="Albert square"/>
+        <coordinates lat="40" long="20"/>
+        <id1 value="b9407f30-f5f8-466e-aff9-25556b57fe6d"/>
+        <id2 value="14547"/>
+        <id3 value="40129"/>
+        <distance value="10"/>
     </Checkpoint>
     <Checkpoint>
-        <name value="Albert square"></name>
-        <coordinates lat="30" long="200"></coordinates>
-        <id1 value="b9407f30-f5f8-466e-aff9-25556b57fe6d"></id1>
-        <id2 value="14547"></id2>
-        <id3 value="61162"></id3>
-        <distance value="1000"></distance>
+        <name value="Albert square"/>
+        <coordinates lat="30" long="200"/>
+        <id1 value="b9407f30-f5f8-466e-aff9-25556b57fe6d"/>
+        <id2 value="14547"/>
+        <id3 value="61162"/>
+        <distance value="1000"/>
     </Checkpoint>
 </CheckpointList>
