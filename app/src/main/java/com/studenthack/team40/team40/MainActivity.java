@@ -41,9 +41,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements BeaconConsumer {
@@ -56,12 +59,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private Region region;
     private GoogleApiClient client;
     private BeaconConsumer consumer = this;
-    private Boolean running = true;
+    private Boolean running = false;
     private String output;
-     FloatingActionButton fab;
+    private FloatingActionButton fab;
     private Resources res;
     private InputStream in;
     private Party currentParty;
+    private Timer myTimer;
+    private int time = 0;
 
     //image slider
     ViewPager viewPager;
@@ -81,10 +86,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         setSupportActionBar(toolbar);
         setTitle("New Run");
 
+        myTimer = new Timer();
+
         //res = getResources();
         in = getResources().openRawResource(R.raw.checkpoints);
 
-         fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -94,13 +101,21 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                     Snackbar.make(view, "Stopped", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
                     fab.setImageResource(R.drawable.ic_media_play);
-
+                    Toast.makeText(getApplicationContext(), String.valueOf(time), Toast.LENGTH_SHORT).show();
+                    myTimer.cancel();
                 } else {
                     running = true;
                     beaconManager.bind(consumer);
                     Snackbar.make(view, "Running", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
                     fab.setImageResource(R.drawable.ic_media_pause);
+
+                    myTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            TimeMethod();
+                        }
+                    }, 0, 1000);
 
                 }
             }
@@ -130,13 +145,25 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         beaconManager.getBeaconParsers().add(new BeaconParser()
                 .setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
 
-        beaconManager.bind(this);
+        //beaconManager.bind(this);
 
         txt = (TextView) findViewById(R.id.mainText);
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         currentParty = new Party();
     }
+
+    private void TimeMethod(){
+        time++;
+        this.runOnUiThread(Timer_Tick);
+        Log.d("Timer", Integer.toString(time));
+    }
+
+    private Runnable Timer_Tick = new Runnable() {
+        @Override
+        public void run() {
+        }
+    };
 
     private boolean IsACheckpoint(Beacon beacon)
     {
@@ -153,28 +180,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         super.onDestroy();
         beaconManager.unbind(this);
     }
-
-   /* @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-   /* @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }*/
 
     @Override
     public void onBeaconServiceConnect() {
@@ -224,11 +229,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
                         if (listOfBeacons.size() > 0) {
                             txt.setText(listOfBeacons.toString());
-                            beaconManager.unbind(consumer);
-                            running = false;
+                            //beaconManager.unbind(consumer);
+                            //running = false;
                             currentParty.update(listOfBeacons); Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
-                            if(currentParty.getIsUpdated())
-                            fab.setImageResource(R.drawable.ic_media_pause);
+                            //if(currentParty.getIsUpdated())
+                            //fab.setImageResource(R.drawable.ic_media_pause);
 
                         }
                         else txt.setText("Hello world");
