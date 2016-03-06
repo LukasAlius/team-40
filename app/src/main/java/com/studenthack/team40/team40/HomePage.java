@@ -1,10 +1,13 @@
 package com.studenthack.team40.team40;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.content.SharedPreferences;
+
 
 public class HomePage extends AppCompatActivity implements View.OnClickListener {
 
@@ -13,9 +16,12 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
     Button btnNewRun;
     Button btnRecentRuns;
     Button btnRecords;
+    Button btnContinue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences sharedPreferences = this.getSharedPreferences("gameSetting", Context.MODE_PRIVATE);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
         setTitle("Team40 App");
@@ -29,7 +35,18 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
         //records button
         btnRecords = (Button)findViewById(R.id.btnRecords);
         btnRecords.setOnClickListener(this);
+        //continue
+        btnContinue = (Button)findViewById(R.id.btnContinue);
+
+
+        if (sharedPreferences.getBoolean("GameOn", false))
+            btnContinue.setVisibility(View.INVISIBLE);
+        else
+            btnContinue.setVisibility(View.VISIBLE);
+
     }
+
+
 
     public void onClick(View view)
     {
