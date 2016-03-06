@@ -11,6 +11,8 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
     //button declared
 
     Button btnNewRun;
+    Button btnRecentRuns;
+    Button btnRecords;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +23,12 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
         //New run button
         btnNewRun = (Button)findViewById(R.id.btnNewRun);
         btnNewRun.setOnClickListener(this);
+        //recent run button
+        btnRecentRuns = (Button)findViewById(R.id.btnRecentRuns);
+        btnRecentRuns.setOnClickListener(this);
+        //records button
+        btnRecords = (Button)findViewById(R.id.btnRecords);
+        btnRecords.setOnClickListener(this);
     }
 
     public void onClick(View view)
@@ -30,7 +38,23 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
             case R.id.btnNewRun:
                 btnNewRunClick();
                 break;
+            case R.id.btnRecentRuns:
+                btnRecentRunsClick();
+                break;
+            case R.id.btnRecords:
+                btnRecordsClick();
+                break;
         }
+    }
+
+    private void btnRecordsClick() {
+        Intent myIntent = new Intent(HomePage.this, Records.class);
+        startActivity(myIntent);
+    }
+
+    private void btnRecentRunsClick() {
+        Intent myIntent = new Intent(HomePage.this, RecentRuns.class);
+        startActivity(myIntent);
     }
 
     private void btnNewRunClick() {

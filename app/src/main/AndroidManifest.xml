@@ -35,6 +35,18 @@
             </intent-filter>
 
         </activity>
+        <activity android:name=".SummaryScreen"
+            android:parentActivityName="com.studenthack.team40.team40.HomePage"
+            />
+        <activity android:name=".Records"
+            android:parentActivityName="com.studenthack.team40.team40.HomePage"
+            />
+        <activity android:name=".RecentRuns"
+            android:parentActivityName="com.studenthack.team40.team40.HomePage"
+        />
+        <activity android:name=".RaceSelector"
+            android:parentActivityName="com.studenthack.team40.team40.HomePage"
+            ></activity>
     </application>
 
 </manifest>
