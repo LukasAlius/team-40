@@ -1,0 +1,58 @@
+<manchester>
+  <beacon>
+    <name>MMU Business School</name>
+    <short>mmubiz</short>
+    <lat>53.470491</lat>
+    <long>-2.240444</long>
+    <id1>b9407f30-f5f8-466e-aff9-25556b57fe6d</id1>
+    <id2>14547</id2>
+    <id3>40129</id3>
+    <localArea>mmu</localArea>
+    <generalArea>universitys</generalArea>
+    <wideArea>central</wideArea>
+    <distance>10</distance>
+  </beacon>
+  <beacon>
+    <name>Holden Gallery</name>
+    <short>holden</short>
+    <lat>53.468760</lat>
+    <long>-2.238352</long>
+    <id1>b9407f30-f5f8-466e-aff9-25556b57fe6d</id1>
+    <id2>14547</id2>
+    <id3>61162</id3>
+    <localArea>mmu</localArea>
+    <generalArea>universitys</generalArea>
+    <wideArea>central</wideArea>
+    <distance>100</distance>
+  </beacon>
+  <beacon>
+    <name>Kilburn Building</name>
+    <short>kilbrn</short>
+    <lat>53.467579</lat>
+    <long>-2.234253</long>
+    <id1>a9999a99-a9a9-999a-aaa9-99999a99aa9a</id1>
+    <id2>14547</id2>
+    <id3>40129</id3>
+    <localArea>uom</localArea>
+    <generalArea>universitys</generalArea>
+    <wideArea>central</wideArea>
+    <distance>10</distance>
+  </beacon>
+
+  <beacon>
+    <name>Wright Robinson</name>
+    <short>wrtrob</short>
+    <lat>53.476104</lat>
+    <long>-2.231990</long>
+    <id1>z1111z11-z1z1-111z-zzz1-11111z11zz1z</id1>
+    <id2>14547</id2>
+    <id3>40129</id3>
+    <localArea>picadilly</localArea>
+    <generalArea>cityCenter</generalArea>
+    <wideArea>central</wideArea>
+    <distance>10</distance>
+  </beacon>
+
+
+
+</manchester>

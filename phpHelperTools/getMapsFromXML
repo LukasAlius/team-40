@@ -1,0 +1,214 @@
+#!/usr/bin/php5
+<?php
+$apiKey = "AIzaSyBpPS5c-8Zj-CgO9na0xy_awbj5wx-bzoA";
+$outputRedirect = "../app/src/main/res/drawable/"; //From current dir, with trailing slash
+$files = scandir('xml/');
+$imageWidth = 600;
+$imageHeight = 800;
+$scale = 1;
+
+
+function latLongDistanceInMeters($lat1, $lon1, $lat2, $lon2)
+{  // generally used geo measurement function
+  $lat1 = floatval($lat1);
+  $lat2 = floatval($lat2);
+  $lon1 = floatval($lon1);
+  $lon2 = floatval($lon2);
+
+    $radius = 6378.137; // Radius of earth in KM
+    $dLat = ($lat2 - $lat1) * (Pi()/180);
+    $dLon = ($lon2 - $lon1) * (Pi()/180);
+    $a = sin($dLat/2) * sin($dLat/2) +
+    cos($lat1 * Pi()/180) * cos($lat2 * Pi()/180) *
+    sin($dLon/2) * sin($dLon/2);
+    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+    $d = $radius * $c * 1000;
+    return $d; // meters
+}
+
+function getZoomLevel($lat, $meters)
+{
+  return log(156543*(cos($lat*Pi()/180))/($meters/600),2);
+}
+
+foreach($files as $file)
+{
+  if($file != "." && $file != "..")
+  {
+    $xml = simplexml_load_string(file_get_contents('xml/'.$file));
+    $location = substr($file, 0, -4);
+
+    exec('rm '.$outputRedirect.'maps/'.$location.' -rf');
+    exec('mkdir '.$outputRedirect.'maps/'.$location);
+    exec('mkdir '.$outputRedirect.'maps/'.$location.'/beacon');
+    exec('mkdir '.$outputRedirect.'maps/'.$location.'/local');
+    exec('mkdir '.$outputRedirect.'maps/'.$location.'/general');
+    exec('mkdir '.$outputRedirect.'maps/'.$location.'/wide');
+
+    $totalLat = array("localArea" => array(),"generalArea"=>array(),"wideArea"=>array());
+    $totalLong = array("localArea" => array(),"generalArea"=>array(),"wideArea"=>array());
+    $totalBeacons = array("localArea" => array(),"generalArea"=>array(),"wideArea"=>array());
+    $labelString = "";
+
+    $areaTypes = array("localArea","generalArea","wideArea");
+
+    //Gather information about the file
+    //Averages, string building and shit like that
+    foreach ($xml as $b)
+    {
+      foreach ($areaTypes as $area)
+      {
+        echo("$b->name $area\n");
+        //Lat
+        if(!isset($totalLat[$area][(string)$b->$area]))
+          $totalLat[$area][(string)$b->$area]=floatval($b->lat);
+        else
+          $totalLat[$area][(string)$b->$area]+=floatval($b->lat);
+
+        if(!isset($totalLong[$area][(string)$b->$area]))
+          $totalLong[$area][(string)$b->$area]=floatval($b->long);
+        else
+          $totalLong[$area][(string)$b->$area]+=floatval($b->long);
+
+        if(!isset($totalBeacons[$area][(string)$b->$area]))
+          $totalBeacons[$area][(string)$b->$area]=1;
+        else
+          $totalBeacons[$area][(string)$b->$area]++;
+
+      }
+      //Should be fine, just get the masive list of all the beacons
+      $labelString .= "&markers=color:red%7C$b->lat,$b->long";
+    }
+
+    $averageLat = array("localArea" => array(),"generalArea"=>array(),"wideArea"=>array());
+
+
+
+    // var_dump($totalLat);
+    // var_dump($totalBeacons);
+
+
+    foreach($totalBeacons as $area => $array)
+    {
+      foreach ($array as $areaName => $value)
+      {
+        $averageLat[$area][$areaName]=$totalLat[$area][$areaName]/$value;
+        $averageLong[$area][$areaName]=$totalLong[$area][$areaName]/$value;
+      }
+    }
+
+    $offset = 0;
+    //$offsetGreatestDistance = 0;
+    $offsetGreatestDistance = array("localArea" => array(),"generalArea"=>array(),"wideArea"=>array());
+    
+    //$greatestDistanceFromAverage = 0;
+    $greatestDistanceFromAverage = array("localArea" => array(),"generalArea"=>array(),"wideArea"=>array());
+
+
+    //var_dump($averageLat);
+    //Then go through it and do stuff with it
+    foreach ($xml as $b)
+    {
+      $url = "http://maps.googleapis.com/maps/api/staticmap?maptype=satellite".
+              "&center=$b->lat,$b->long".
+              "&markers=color:blue%7C$b->lat,$b->long".$labelString.
+              "&zoom=16&size=$imageWidth"."x$imageHeight".
+              "&scale=$scale".
+              "&sensor=false&key=$apiKey";
+      
+      echo $url;
+      file_put_contents($outputRedirect."maps/$location/beacon/$b->id1.png", file_get_contents($url));
+
+
+      foreach ($areaTypes as $area)
+      {
+        // var_dump($averageLat[$area]);
+        // if(isset($averageLat[$area][(string)$b->$area]));
+
+        $distanceFromAverage = sqrt(pow(floatval($b->lat) - $averageLat[$area][(string)$b->$area],2) + 
+                                      pow(floatval($b->long) - $averageLong[$area][(string)$b->$area],2));
+        echo $area." ". $b->$area." Distance from average in Lat/Longs: $distanceFromAverage\n";
+
+        if(!isset($greatestDistanceFromAverage[$area][(string)$b->$area]) || $distanceFromAverage > $greatestDistanceFromAverage[$area][(string)$b->$area])
+        {
+          $greatestDistanceFromAverage[$area][(string)$b->$area] = $distanceFromAverage; //This is in lat/long's just because
+          $offsetGreatestDistance[$area][(string)$b->$area] = $offset;
+          echo "New greatest distance set at ".$distanceFromAverage."\n";
+        }
+        // echo "\n";
+      }
+      $offset++;
+
+    }
+
+    var_dump($totalBeacons);
+    var_dump($offsetGreatestDistance);
+
+    $offset = 0;
+    foreach($offsetGreatestDistance as $area => $array)
+    {
+      foreach ($array as $areaName => $value)
+      {
+        //echo $area." ". $areaName." ".$value."\n";
+        //var_dump($offsetGreatestDistance[$area][$areaName]);
+
+        //echo gettype($xml->beacon[$offsetGreatestDistance[$area][$areaName]]->lat);
+        $largestOffset = latLongDistanceInMeters(
+                                $xml->beacon[$value]->lat,
+                                $xml->beacon[$value]->long,
+                                $averageLat[$area][$areaName],
+                                $averageLong[$area][$areaName]);
+
+        if($largestOffset==0)
+          $largestOffset+=0.1;
+
+        echo $xml->beacon[$value]->lat."\n";
+        
+
+        $zoomLevel = floor(getZoomLevel($averageLat[$area][$areaName], $largestOffset)) - 1;
+        echo $zoomLevel."\n";
+        if ($zoomLevel > 16)
+          $zoomLevel = 16;
+        //echo("Lat: $averageLat Lon: $averageLong\n");
+        $url = "http://maps.googleapis.com/maps/api/staticmap?maptype=satellite".
+                "&center=".$averageLat[$area][$areaName].",".$averageLong[$area][$areaName].$labelString.
+                "&scale=$scale".
+                "&zoom=$zoomLevel&size=$imageWidth"."x$imageHeight&sensor=false&key=$apiKey";
+        //echo $url."\n";
+                echo $area;
+        file_put_contents($outputRedirect."maps/$location/".substr($area, 0, -4)."/$areaName.png", file_get_contents($url));   
+      }
+    }
+
+    //This Block, if enabled, zips the folder
+    /*$rootPath = realpath($outputRedirect.'maps/'.$location);
+
+    exec('rm '.$outputRedirect.'/maps/'.$location.'.zip');
+    // Initialize archive object
+    $zip = new ZipArchive();
+    $zip->open($outputRedirect.'/maps/'.$location.'.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+    // Create recursive directory iterator
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($rootPath),
+        RecursiveIteratorIterator::LEAVES_ONLY
+    );
+
+    foreach ($files as $name => $file)
+    {
+      // Skip directories (they would be added automatically)
+      if (!$file->isDir())
+      {
+          // Get real and relative path for current file
+          $filePath = $file->getRealPath();
+          $relativePath = substr($filePath, strlen($rootPath) + 1);
+          // Add current file to archive
+          $zip->addFile($filePath, $relativePath);
+        }
+    }*/
+
+
+  }
+}
+
+?>

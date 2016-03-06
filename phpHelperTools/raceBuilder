@@ -1,0 +1,148 @@
+#!/usr/bin/php5
+<?php
+$apiKey = "AIzaSyBpPS5c-8Zj-CgO9na0xy_awbj5wx-bzoA";
+$files = scandir('xml/');
+$input = "";
+$labelString = "";
+
+function stdin($preamble) {
+  if(isset($preamble))
+    echo($preamble);
+  $stdin = fopen('php://stdin', 'r');
+  return substr(fgets($stdin, 1024),0,-1);
+}
+
+function latLongDistanceInMeters($lat1, $lon1, $lat2, $lon2)
+{  // generally used geo measurement function
+  $lat1 = floatval($lat1);
+  $lat2 = floatval($lat2);
+  $lon1 = floatval($lon1);
+  $lon2 = floatval($lon2);
+
+    $radius = 6378.137; // Radius of earth in KM
+    $dLat = ($lat2 - $lat1) * (Pi()/180);
+    $dLon = ($lon2 - $lon1) * (Pi()/180);
+    $a = sin($dLat/2) * sin($dLat/2) +
+    cos($lat1 * Pi()/180) * cos($lat2 * Pi()/180) *
+    sin($dLon/2) * sin($dLon/2);
+    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+    $d = $radius * $c * 1000;
+    return $d; // meters
+}
+
+function findAverage($arrayOfPoints)
+{
+  $totalLat = 0;
+  $totalLong = 0;
+  $totalPoints = 0;
+
+    //Gather information about the file
+    foreach ($arrayOfPoints as $key => $b)
+    {
+        //Lat
+        $totalLat+=floatval($b->lat);
+        $totalLong+=floatval($b->long);
+        $totalPoints++;
+    }
+
+    $averageCoordinates = array("lat"=>$totalLat/$totalPoints,"long"=>$totalLong/$totalPoints);
+
+    return $averageCoordinates;
+
+}
+
+
+
+foreach($files as $file) {
+  if($file != "." && $file != "..") {
+    $xml = simplexml_load_string(file_get_contents('xml/'.$file));
+    $location = substr($file, 0, -4);
+
+
+
+    //$input = stdin("Area set to $location, make a race? [yes/no]: ");
+    if ($input == "no")
+      break;
+
+    $raceArray=array();
+    $nodeArray=array();
+    $raceName = "";
+    $lastLabel = "";
+    $raceCurrentNodes=0;
+    foreach ($xml as $cp) {
+      $nodeArray[(string)$cp->short] = $cp;
+    }
+
+    while($input != "finish")
+    {
+      if ($raceCurrentNodes == 0)
+      {
+        echo("Please pick a starting node:\n");
+        $label = "S";
+      } 
+      else
+      {
+        echo("Please pick the next node or type \"finish\" to end\n");
+        $label = $raceCurrentNodes;
+      }
+      echo("\n");
+
+      foreach ($nodeArray as $shortName => $node) {
+        if(!isset($raceArray[$shortName])) {
+          echo "$node->short: ";
+          if ($raceCurrentNodes > 0) {
+            echo str_pad(floor(latLongDistanceInMeters(end($raceArray)->lat,
+                                                        end($raceArray)->long,
+                                                        $node->lat,$node->long)),4," ",STR_PAD_LEFT)."m";
+          }
+          else
+            echo("     ");
+          echo(" $node->name ");          
+        }
+        echo("\n");
+      }
+
+      $input=stdin("        Please select a node: ");
+
+      if(isset($nodeArray[$input]))
+      {
+        $raceArray[$input] = $nodeArray[$input];
+        $raceName.=$input;
+        $labelString .= $lastLabel;
+        $lastLabel = "&markers=color:red|label:".$label."|".$nodeArray[$input]->lat.",".$nodeArray[$input]->long;
+        unset($nodeArray[$input]);
+        $raceCurrentNodes++;
+      }
+    }
+    $labelString .= "&markers=color:red|label:F|".end($raceArray)->lat.",".end($raceArray)->long;
+    $averageCoordinates = findAverage($raceArray);
+
+    $url = "http://maps.googleapis.com/maps/api/staticmap?maptype=satellite".
+              "&center=".$averageCoordinates["lat"].",".$averageCoordinates["long"].
+              $labelString.
+              "&zoom=16&size=600x600".
+              "&sensor=false&key=$apiKey";
+    file_put_contents("raceMaps/".$raceName.".png", file_get_contents($url));
+
+    $outPutXMLElement = "";
+    foreach ($raceArray as $key => $value) 
+    {
+      $outPutXMLElement.=$value->asXML();
+    }
+
+    $outPutXMLElement ="<race>".$outPutXMLElement."</race>";
+    file_put_contents("raceXML/".$raceName.".xml",$outPutXMLElement);
+  }
+}
+echo("Thanks for using.");
+
+
+
+
+
+
+
+
+
+
+?>
