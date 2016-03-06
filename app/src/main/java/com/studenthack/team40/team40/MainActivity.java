@@ -134,6 +134,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         txt = (TextView) findViewById(R.id.mainText);
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        currentParty = new Party();
     }
 
     private boolean IsACheckpoint(Beacon beacon)
@@ -222,9 +224,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
                         if (listOfBeacons.size() > 0) {
                             txt.setText(listOfBeacons.toString());
-                            Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
                             beaconManager.unbind(consumer);
                             running = false;
+                            currentParty.update(listOfBeacons); Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
+                            if(currentParty.getIsUpdated())
                             fab.setImageResource(R.drawable.ic_media_pause);
 
                         }
