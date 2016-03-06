@@ -1,6 +1,6 @@
 # team-40
 
-##To lunch the application you will need :
+##To launch the application you will need :
   - Android Studio 
   - An android mobile phone with Bluetooth connection
   - At least one beacon
