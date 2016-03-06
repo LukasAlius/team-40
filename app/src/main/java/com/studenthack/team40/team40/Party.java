@@ -17,6 +17,7 @@ public class Party {
     private Date startDate;
     private Date arrivalDate;
     private Boolean isUpdated;
+    private Time timer;
 
     public void setValidatedCheckpointsID(ArrayList<String> checkpointsID){
         validatedCheckpointsID = checkpointsID;
@@ -46,12 +47,18 @@ public class Party {
 
     public Boolean getIsUpdated() {return isUpdated;}
 
+    public void setTimer(Time t){
+        timer = t;
+    }
+
+    public Time getTimer(){return timer;}
 
 
     public Party(){
         validatedCheckpointsID = new ArrayList<>();
         startDate = null;
         arrivalDate = null;
+        timer = null;
     }
 
     public void update(ArrayList<Beacon> points){
@@ -75,6 +82,7 @@ public class Party {
         validatedCheckpointsID = new ArrayList<>();
         startDate = null;
         arrivalDate = null;
+        timer = null;
     }
 
     public void start() {

@@ -1,5 +1,7 @@
 package com.studenthack.team40.team40;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
@@ -67,6 +69,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private Party currentParty;
     private Timer myTimer;
     private int time = 0;
+    public static final String MyPREFERENCES = "MyPrefs" ;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+
 
     //image slider
     ViewPager viewPager;
@@ -91,6 +97,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         //res = getResources();
         in = getResources().openRawResource(R.raw.checkpoints);
 
+        sharedPreferences = this.getSharedPreferences("gameSetting", Context.MODE_PRIVATE);
+
+        editor = sharedPreferences.edit();
+
+        Log.d(TAG, "GameOn = " + sharedPreferences.getBoolean("GameOn", false));
+        //doSave();
+        //loadGameSetting();
+
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                             .setAction("Action", null).show();
                     fab.setImageResource(R.drawable.ic_media_play);
                     Toast.makeText(getApplicationContext(), String.valueOf(time), Toast.LENGTH_SHORT).show();
+                    editor.putBoolean("GameOn", false);
+                    editor.apply();
                     myTimer.cancel();
                 } else {
                     running = true;
@@ -116,14 +132,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                             TimeMethod();
                         }
                     }, 0, 1000);
-
+                    editor.putBoolean("GameOn", true);
+                    editor.apply();
                 }
             }
         });
 
 
 
-        Log.d(TAG, "post deserialization = " + listOfCheckpoints.toString());
         HandleXML obj = new HandleXML();
         obj.fetchXML(in);
         listOfCheckpoints = obj.getListOfCheckpoints();
@@ -156,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private void TimeMethod(){
         time++;
         this.runOnUiThread(Timer_Tick);
-        Log.d("Timer", Integer.toString(time));
+        //Log.d("Timer", Integer.toString(time));
     }
 
     private Runnable Timer_Tick = new Runnable() {
@@ -235,6 +251,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                             if(currentParty.getIsUpdated()) {
                                 Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
                                 currentParty.setIsUpdated(false);
+                                int i = 0;
+                                for (String check: currentParty.getValidatedCheckpointsID())
+                                {
+                                    editor.putString("ID"+i, check);
+                                }
+                                editor.apply();
                             }
                             //fab.setImageResource(R.drawable.ic_media_pause);
 
@@ -293,6 +315,46 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
+    }
+
+    private void loadGameSetting()  {
+        SharedPreferences sharedPreferences= this.getSharedPreferences("gameSetting", Context.MODE_PRIVATE);
+
+        if(sharedPreferences!= null) {
+
+            int brightness = sharedPreferences.getInt("brightness", 90);
+            int sound = sharedPreferences.getInt("sound",95);
+            int checkedRadioButtonId = sharedPreferences.getInt("checkedRadioButtonId", 20);
+
+
+
+        } else {
+
+            Toast.makeText(this,"Use the default game setting",Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    // Called when user click to Save button.
+    public void doSave()  {
+        // The created file can only be accessed by the calling application
+        // (or all applications sharing the same user ID).
+        SharedPreferences sharedPreferences= this.getSharedPreferences("gameSetting", Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putInt("brightness", 0);
+        editor.putInt("sound", 10);
+
+        // Checked RadioButton ID.
+        int checkedRadioButtonId = 20;
+
+        editor.putInt("checkedRadioButtonId", checkedRadioButtonId);
+
+        // Save.
+        editor.apply();
+
+        Toast.makeText(this,"Game Setting saved!",Toast.LENGTH_LONG).show();
     }
 
 
