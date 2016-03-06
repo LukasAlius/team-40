@@ -231,8 +231,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                             txt.setText(listOfBeacons.toString());
                             //beaconManager.unbind(consumer);
                             //running = false;
-                            currentParty.update(listOfBeacons); Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
-                            //if(currentParty.getIsUpdated())
+                            currentParty.update(listOfBeacons);
+                            if(currentParty.getIsUpdated()) {
+                                Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
+                                currentParty.setIsUpdated(false);
+                            }
                             //fab.setImageResource(R.drawable.ic_media_pause);
 
                         }
