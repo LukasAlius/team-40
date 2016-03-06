@@ -3,19 +3,16 @@ package com.studenthack.team40.team40;
 import android.support.v4.view.PagerAdapter;
 import android.app.Activity;
 import android.content.Context;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 public class CustomAdapter extends PagerAdapter {
 
     Context context;
-    int[] imageId = {R.drawable.image1, R.drawable.image2, R.drawable.image3, R.drawable.image4};
+    int[] imageId = {R.drawable.citycenter, R.drawable.universitys, R.drawable.image3, R.drawable.image4};
 
     public CustomAdapter(Context context){
         this.context = context;

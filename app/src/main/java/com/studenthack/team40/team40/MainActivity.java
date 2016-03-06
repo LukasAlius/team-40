@@ -1,6 +1,7 @@
 package com.studenthack.team40.team40;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -115,10 +116,15 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                     Snackbar.make(view, "Stopped", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
                     fab.setImageResource(R.drawable.ic_media_play);
-                    Toast.makeText(getApplicationContext(), String.valueOf(time), Toast.LENGTH_SHORT).show();
                     editor.putBoolean("GameOn", false);
                     editor.apply();
                     myTimer.cancel();
+                    myTimer = new Timer();
+                    Intent myIntent = new Intent(MainActivity.this, SummaryScreen.class);
+                    myIntent.putExtra("Time", time);
+                    time = 0;
+                    myIntent.putExtra("BeaconsNum", currentParty.getValidatedCheckpointsID().size());
+                    startActivity(myIntent);
                 } else {
                     running = true;
                     beaconManager.bind(consumer);
@@ -126,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                             .setAction("Action", null).show();
                     fab.setImageResource(R.drawable.ic_media_pause);
 
-                    myTimer.schedule(new TimerTask() {
+                    myTimer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
                             TimeMethod();
@@ -172,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private void TimeMethod(){
         time++;
         this.runOnUiThread(Timer_Tick);
-        //Log.d("Timer", Integer.toString(time));
+        Log.d("Timer", Integer.toString(time));
     }
 
     private Runnable Timer_Tick = new Runnable() {
@@ -248,20 +254,18 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                             //beaconManager.unbind(consumer);
                             //running = false;
                             currentParty.update(listOfBeacons);
-                            if(currentParty.getIsUpdated()) {
+                            if (currentParty.getIsUpdated()) {
                                 Toast.makeText(getApplicationContext(), "Found a Beacon!", Toast.LENGTH_SHORT).show();
                                 currentParty.setIsUpdated(false);
                                 int i = 0;
-                                for (String check: currentParty.getValidatedCheckpointsID())
-                                {
-                                    editor.putString("ID"+i, check);
+                                for (String check : currentParty.getValidatedCheckpointsID()) {
+                                    editor.putString("ID" + i, check);
                                 }
                                 editor.apply();
                             }
                             //fab.setImageResource(R.drawable.ic_media_pause);
 
-                        }
-                        else txt.setText("Hello world");
+                        } else txt.setText("Hello runner");
                     }
                 });
 

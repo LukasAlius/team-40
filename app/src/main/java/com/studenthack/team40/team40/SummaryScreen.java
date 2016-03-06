@@ -1,5 +1,6 @@
 package com.studenthack.team40.team40;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,6 +12,11 @@ public class SummaryScreen extends AppCompatActivity implements View.OnClickList
     ImageButton btnHome;
 
     int x = 14;
+    private int time;
+    private int beaconsNum;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,8 +26,11 @@ public class SummaryScreen extends AppCompatActivity implements View.OnClickList
         TextView txtTime = (TextView)findViewById(R.id.txtTime);
         TextView txtBeacons = (TextView)findViewById(R.id.txtCheckpoints);
 
-        txtTime.setText("" + x);
-        txtBeacons.setText("" + x);
+        time = getIntent().getExtras().getInt("Time");
+        beaconsNum = getIntent().getExtras().getInt("BeaconsNum");
+
+        txtTime.setText("" + time);
+        txtBeacons.setText("" + beaconsNum);
         btnHome = (ImageButton)findViewById(R.id.btnHome);
         btnHome.setOnClickListener(this);
 
@@ -37,6 +46,9 @@ public class SummaryScreen extends AppCompatActivity implements View.OnClickList
     }
 
     private void btnHomeClick() {
-        finish();
+
+        //finish();
+        Intent intent = new Intent(SummaryScreen.this, HomePage.class);
+        startActivity(intent);
     }
 }
