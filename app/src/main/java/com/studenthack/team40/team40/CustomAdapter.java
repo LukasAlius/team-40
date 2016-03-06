@@ -12,7 +12,7 @@ import android.widget.ImageView;
 public class CustomAdapter extends PagerAdapter {
 
     Context context;
-    int[] imageId = {R.drawable.citycenter, R.drawable.universitys, R.drawable.image3, R.drawable.image4};
+    int[] imageId = {R.drawable.central, R.drawable.universitys, R.drawable.image3, R.drawable.image4};
 
     public CustomAdapter(Context context){
         this.context = context;
